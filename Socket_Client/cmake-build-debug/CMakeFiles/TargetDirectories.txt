@@ -1,0 +1,3 @@
+C:/Users/Sebas/OneDrive - Estudiantes ITCR/Documentos/Universidad/TEC/Programacion/Datos2/Proyectos/Proyecto1_MPointers/Socket_Client/cmake-build-debug/CMakeFiles/Socket_Client.dir
+C:/Users/Sebas/OneDrive - Estudiantes ITCR/Documentos/Universidad/TEC/Programacion/Datos2/Proyectos/Proyecto1_MPointers/Socket_Client/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Sebas/OneDrive - Estudiantes ITCR/Documentos/Universidad/TEC/Programacion/Datos2/Proyectos/Proyecto1_MPointers/Socket_Client/cmake-build-debug/CMakeFiles/rebuild_cache.dir
