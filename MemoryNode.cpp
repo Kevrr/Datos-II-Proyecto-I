@@ -1,3 +1,4 @@
+#include <cstdlib>
 
 enum DataType {
     INT,
@@ -19,5 +20,6 @@ struct MemoryNode {
         this->type = type;
         this->ptr = ptr;
         this->refCount = -1;
+        this->next = nullptr;
     }
 };

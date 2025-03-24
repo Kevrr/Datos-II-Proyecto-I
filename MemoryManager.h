@@ -3,15 +3,18 @@
 
 #include <stdlib.h>
 #include "MemoryMap.h"
+#include <string>
 
 class MemoryManager {
     private:
     size_t totalSize;
     void* memoryBlock;
     size_t usedSize;
+    int currentID;
     MemoryMap* map;
+    std::string dumpPath;
 
-    void create(size_t size, DataType type);
+    int create(size_t size, DataType type);
     template<typename T>
     void set(int id, T value);
     template<typename T>
@@ -20,7 +23,9 @@ class MemoryManager {
     void decreaseRefCount(int id);
 
     public:
-    MemoryManager(int size);
+    MemoryManager(int size, std::string path);
+    ~MemoryManager();
+    void run();
 };
 
 #endif

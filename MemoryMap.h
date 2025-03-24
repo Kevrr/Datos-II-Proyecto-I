@@ -2,17 +2,19 @@
 #define MEMORYMAP_H
 
 #include "MemoryNode.cpp"
+#include <string>
 
 class MemoryMap {
     private:
     MemoryNode* head;
-    int size;
-
+    std::string dumpPath;
+    
+    void dump();
+    
     public:
-    MemoryMap();
+    MemoryMap(std::string path);
     ~MemoryMap();
     void clear();
-    int getSize();
     MemoryNode* find(int id);
     void add(int id, size_t size, DataType type, void* ptr);
     void clean();

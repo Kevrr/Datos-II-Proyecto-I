@@ -1,24 +1,39 @@
 #include "MemoryManager.h"
+#include "MemoryMap.cpp"
 
-MemoryManager::MemoryManager(int size) {
+MemoryManager::MemoryManager(int size, std::string path) {
+    this->totalSize = size;
     this->memoryBlock = malloc(size);
+    this->usedSize = 0;
+    this->currentID = 0;
+    this->dumpPath = path;
+    this->map = new MemoryMap(path);
 }
 
-void MemoryManager::create(size_t size, DataType type) {
+MemoryManager::~MemoryManager() {
+    free(this->memoryBlock);
+    delete(this->map);
+}
+
+
+int MemoryManager::create(size_t size, DataType type) {
     if (this->usedSize + size > this->totalSize) {
-        return;
+        return -1;
     }
     void* ptr = static_cast<char*>(memoryBlock) + usedSize;
     this->usedSize += size;
-
-    this->map->add(this->map->getSize(), size, type, ptr);
+    
+    int id = this->currentID;
+    this->currentID++;
+    this->map->add(id, size, type, ptr);
+    return id;
 }
 
 template<typename T>
 void MemoryManager::set(int id, T value) {
     void* ptr = this->map->find(id)->ptr;
     if (ptr != nullptr) {
-        *ptr = value;
+        *reinterpret_cast<T*>(ptr) = value;
     }
 }
 
@@ -26,7 +41,7 @@ template<typename T>
 T MemoryManager::get(int id) {
     void* ptr = this->map->find(id)->ptr;
     if (ptr != nullptr) {
-        return *ptr;
+        return *reinterpret_cast<T*>(ptr);
     }
 }
 
@@ -46,4 +61,16 @@ void MemoryManager::decreaseRefCount(int id) {
     if (memNode != nullptr) {
         memNode->refCount--;
     }
+}
+
+void MemoryManager::run() {
+    int id1 = this->create(sizeof(int), INT);
+    int id2 = this->create(sizeof(float), FLOAT);
+    int id3 = this->create(sizeof(char), CHAR);
+
+    this->set(id1, 42);
+    this->set(id2, 3.14f);
+    this->set(id3, 'A');
+
+    this->map->clear();
 }

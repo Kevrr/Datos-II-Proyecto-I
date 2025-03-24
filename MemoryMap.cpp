@@ -1,8 +1,11 @@
 #include "MemoryMap.h"
+#include <ctime>
+#include <fstream>
+#include <iostream>
 
-MemoryMap::MemoryMap() {
+MemoryMap::MemoryMap(std::string path) {
     this->head = nullptr;
-    this->size = 0;
+    this->dumpPath = path;
 }
 
 MemoryMap::~MemoryMap() {
@@ -15,10 +18,7 @@ void MemoryMap::clear() {
         this->head = this->head->next;
         delete (temp);
     }
-}
-
-int MemoryMap::getSize() {
-    return this->size;
+    this->dump();
 }
 
 MemoryNode* MemoryMap::find(int id) {
@@ -31,20 +31,18 @@ MemoryNode* MemoryMap::find(int id) {
     return nullptr;
 }
 
-
 void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
     MemoryNode* newNode = new MemoryNode(id, size, type, ptr);
     if (this->head == nullptr) {
         this->head = newNode;
-        this->size = 1;
     } else {
         MemoryNode* current = this->head;
         while (current->next != nullptr) {
             current = current->next;
         }
         current->next = newNode;
-        this->size++;
     }
+    this->dump();
 }
 
 void MemoryMap::clean() {
@@ -65,8 +63,33 @@ void MemoryMap::clean() {
         current = current->next;
         if (temp != nullptr) {
             delete(temp);
-            this->size--;
         }
     }
-    
+    this->dump();
+}
+
+void MemoryMap::dump() {
+    char currentTime[100];
+    time_t t = time(nullptr);
+    tm* timePtr = localtime(&t);
+    strftime(currentTime, sizeof(currentTime), "%B-%d-%Y-%H:%M:%S.txt", timePtr);
+
+    std::string outPath = this->dumpPath;
+    std::string fileName = outPath.append(currentTime);
+    std::ofstream file(fileName);
+    if (!file) {
+        std::cerr << "couldnt'open file" << fileName << std::endl;
+        return;
+    }
+    file << "Memory Map:\n";
+    MemoryNode* temp = head;
+    while (temp != nullptr) {
+        file << "ID: " << temp->id
+             << ", Size: " << temp->size
+             << ", Type: " << temp->type
+             << ", Address: " << temp->ptr
+             << "\n";
+        temp = temp->next;
+    }
+    file.close();
 }
