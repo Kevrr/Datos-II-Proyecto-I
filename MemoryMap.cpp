@@ -6,6 +6,7 @@
 MemoryMap::MemoryMap(std::string path) {
     this->head = nullptr;
     this->dumpPath = path;
+    this->files = 1;
 }
 
 MemoryMap::~MemoryMap() {
@@ -72,15 +73,23 @@ void MemoryMap::dump() {
     char currentTime[100];
     time_t t = time(nullptr);
     tm* timePtr = localtime(&t);
-    strftime(currentTime, sizeof(currentTime), "%B-%d-%Y-%H:%M:%S.txt", timePtr);
+    strftime(currentTime, sizeof(currentTime), "%B_%d_%Y_%H-%M-%S", timePtr);
+
+    std::string name = currentTime;
+    name.append(" (");
+    name += std::to_string(this->files);
+    name.append(")");
+    name.append(".txt");
 
     std::string outPath = this->dumpPath;
-    std::string fileName = outPath.append(currentTime);
+    std::string fileName = outPath.append(name);
     std::ofstream file(fileName);
     if (!file) {
-        std::cerr << "couldnt'open file" << fileName << std::endl;
+        std::cerr << "couldn't open file " << fileName << std::endl;
+        perror("Error details");
         return;
     }
+    this->files++;
     file << "Memory Map:\n";
     MemoryNode* temp = head;
     while (temp != nullptr) {

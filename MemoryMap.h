@@ -8,6 +8,7 @@ class MemoryMap {
     private:
     MemoryNode* head;
     std::string dumpPath;
+    int files;
     
     void dump();
     
