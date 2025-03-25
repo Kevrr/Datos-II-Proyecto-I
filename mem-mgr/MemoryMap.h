@@ -1,0 +1,27 @@
+#ifndef MEMORYMAP_H
+#define MEMORYMAP_H
+
+#include "MemoryNode.cpp"
+#include <string>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+
+class MemoryMap {
+    private:
+    MemoryNode* head;
+    std::string dumpPath;
+    int files;
+    
+    void dump();
+    
+    public:
+    MemoryMap(std::string path);
+    ~MemoryMap();
+    void clear();
+    MemoryNode* find(int id);
+    void add(int id, size_t size, DataType type, void* ptr);
+    void clean();
+};
+
+#endif
