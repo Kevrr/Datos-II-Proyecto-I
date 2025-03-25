@@ -14,6 +14,8 @@ class MemoryManager {
     MemoryMap* map;
     std::string dumpPath;
 
+    public:
+    MemoryManager(int size, std::string path);
     int create(size_t size, DataType type);
     template<typename T>
     void set(int id, T value);
@@ -21,9 +23,6 @@ class MemoryManager {
     T get(int id);
     void increaseRefCount(int id);
     void decreaseRefCount(int id);
-
-    public:
-    MemoryManager(int size, std::string path);
     ~MemoryManager();
     void run();
 };
