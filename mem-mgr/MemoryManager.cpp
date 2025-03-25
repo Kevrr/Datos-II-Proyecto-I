@@ -1,6 +1,12 @@
 #include "MemoryManager.h"
 #include "MemoryMap.cpp"
 
+/**
+ * @brief Construct a new Memory Manager
+ * 
+ * @param size size of the memory block
+ * @param path directory to dump the files with the changes in memory
+ */
 MemoryManager::MemoryManager(int size, std::string path) {
     this->totalSize = size;
     this->memoryBlock = malloc(size);
@@ -10,12 +16,22 @@ MemoryManager::MemoryManager(int size, std::string path) {
     this->map = new MemoryMap(path);
 }
 
+/**
+ * @brief Destroy the Memory Manager, freeing the saved memory and deleting the memory map
+ * 
+ */
 MemoryManager::~MemoryManager() {
-    free(this->memoryBlock);
     delete(this->map);
+    free(this->memoryBlock);
 }
 
-
+/**
+ * @brief allocates memory for a new value
+ * 
+ * @param size size of the memory to allocate
+ * @param type type for the value
+ * @return int ID of the cell for the alocated memory
+ */
 int MemoryManager::create(size_t size, DataType type) {
     if (this->usedSize + size > this->totalSize) {
         return -1;
@@ -29,6 +45,13 @@ int MemoryManager::create(size_t size, DataType type) {
     return id;
 }
 
+/**
+ * @brief method to set a value in a memory cell
+ * 
+ * @tparam T type saved in the cell
+ * @param id identifier for the cell
+ * @param value value to save in the address
+ */
 template<typename T>
 void MemoryManager::set(int id, T value) {
     void* ptr = this->map->find(id)->ptr;
@@ -37,6 +60,13 @@ void MemoryManager::set(int id, T value) {
     }
 }
 
+/**
+ * @brief method to get the value in a memory cell
+ * 
+ * @tparam T type saved in the cell
+ * @param id identifier for the cell
+ * @return T value saved in the cell
+ */
 template<typename T>
 T MemoryManager::get(int id) {
     void* ptr = this->map->find(id)->ptr;
@@ -45,6 +75,11 @@ T MemoryManager::get(int id) {
     }
 }
 
+/**
+ * @brief method to increase the number of references of a given memory cell
+ * 
+ * @param id identifier for the cell
+ */
 void MemoryManager::increaseRefCount(int id) {
     MemoryNode* memNode = this->map->find(id);
     if (memNode != nullptr) {
@@ -56,6 +91,11 @@ void MemoryManager::increaseRefCount(int id) {
     }
 }
 
+/**
+ * @brief method to decrease the number of references of a given memory cell
+ * 
+ * @param id identifier for the cell
+ */
 void MemoryManager::decreaseRefCount(int id) {
     MemoryNode* memNode = this->map->find(id);
     if (memNode != nullptr) {

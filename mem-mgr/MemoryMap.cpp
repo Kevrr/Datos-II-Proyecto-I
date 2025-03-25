@@ -1,27 +1,43 @@
 #include "MemoryMap.h"
-#include <ctime>
-#include <fstream>
-#include <iostream>
 
+/**
+ * @brief Construct a new Memory Map
+ * 
+ * @param path string with the direction where dump files will be created
+ */
 MemoryMap::MemoryMap(std::string path) {
     this->head = nullptr;
     this->dumpPath = path;
     this->files = 1;
 }
 
+/**
+ * @brief Destroy the Memory Map, clearing all its memory cells first
+ * 
+ */
 MemoryMap::~MemoryMap() {
     this->clear();
 }
 
+/**
+ * @brief method to delete all memory cells in the memory map
+ * 
+ */
 void MemoryMap::clear() {
     while (this->head != nullptr) {
         MemoryNode* temp = this->head;
         this->head = this->head->next;
-        delete (temp);
+        delete(temp);
     }
     this->dump();
 }
 
+/**
+ * @brief method to find an memory cell given its ID
+ * 
+ * @param id 
+ * @return MemoryNode* 
+ */
 MemoryNode* MemoryMap::find(int id) {
     MemoryNode* current = this->head;
     while (current != nullptr) {
@@ -32,6 +48,14 @@ MemoryNode* MemoryMap::find(int id) {
     return nullptr;
 }
 
+/**
+ * @brief method to create an memory cell
+ * 
+ * @param id ID for the memory cell
+ * @param size size of the memory cell
+ * @param type type for the value to be saved in the memory cell
+ * @param ptr address of the given space
+ */
 void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
     MemoryNode* newNode = new MemoryNode(id, size, type, ptr);
     if (this->head == nullptr) {
@@ -46,6 +70,10 @@ void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
     this->dump();
 }
 
+/**
+ * @brief method that deletes all memory cells with no references
+ * 
+ */
 void MemoryMap::clean() {
     MemoryNode* current = this->head;
     MemoryNode* prev = nullptr;
@@ -69,6 +97,10 @@ void MemoryMap::clean() {
     this->dump();
 }
 
+/**
+ * @brief method that creates a txt with the current state of the memory map
+ * 
+ */
 void MemoryMap::dump() {
     char currentTime[100];
     time_t t = time(nullptr);

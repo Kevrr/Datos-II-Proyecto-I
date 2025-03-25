@@ -1,4 +1,4 @@
-#include "MemoryManager.cpp"
+#include "mem-mgr/MemoryManager.cpp"
 
 int main(int argc, char* argv[]) {
     MemoryManager* memmgr = new MemoryManager(1024, "");

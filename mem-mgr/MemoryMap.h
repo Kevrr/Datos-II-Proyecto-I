@@ -3,6 +3,9 @@
 
 #include "MemoryNode.cpp"
 #include <string>
+#include <ctime>
+#include <fstream>
+#include <iostream>
 
 class MemoryMap {
     private:
