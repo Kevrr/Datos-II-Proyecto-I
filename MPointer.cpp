@@ -17,7 +17,8 @@ int MPointer<T>::getID() {
 
 template <typename T>
 T& MPointer<T>::operator*(){
-    return *this -> value;
+    T value = sendRequest(serverIP, port, "GET 1")
+    return value;
 }
 
 template <typename T>
