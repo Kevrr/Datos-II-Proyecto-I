@@ -6,6 +6,7 @@
 #include <pthread.h>     // Para manejo de hilos
 #include <fstream>
 #pragma comment(lib, "Ws2_32.lib") // Vincula la biblioteca Ws2_32.lib para usar Winsock
+//#include "mem-mgr/MemoryManager.cpp"
 
 
 // Variables globales
@@ -13,6 +14,7 @@ size_t memSize;
 
 // Función para crear un bloque de memoria 
 int Create(size_t size, const std::string& type) {
+
     return 1;        
 }
 
@@ -76,11 +78,12 @@ void* handleClient(void* arg) {
 
 // Función para manejar el servidor de sockets
 void* serverThread(void* arg) {
+    int port = *(int*)arg; // Obtiene el puerto desde el argumento
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0); // Crea el socket del servidor
     sockaddr_in serverAddr = {};                       // Configura la dirección del servidor
     serverAddr.sin_family = AF_INET;                   // Familia de direcciones IPv4
     serverAddr.sin_addr.s_addr = INADDR_ANY;           // Acepta conexiones de cualquier IP
-    serverAddr.sin_port = htons(8080);                 // Puerto del servidor
+    serverAddr.sin_port = htons(port);                 // Usa el puerto recibido como argumento
 
     bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)); // Asocia el socket al puerto
     listen(serverSocket, 5);                                      // Escucha conexiones entrantes
@@ -95,13 +98,14 @@ void* serverThread(void* arg) {
 
 int main(int argc, char* argv[]) {
     
-    if (argc != 2) {
-        std::cerr << "Uso: ./mem-mgr <SIZE_MB>" << std::endl;
+    if (argc != 3) {
+        std::cerr << "Uso: ./mem-mgr <PORT> <SIZE_MB>" << std::endl;
         return 1;
     }
 
     // Calcula el tamaño del pool de memoria en bytes
-    memSize = atoi(argv[1]) * 1024 * 1024;
+    memSize = atoi(argv[2]) * 1024 * 1024;
+    int port = atoi(argv[1]);
 
     // Inicializa Winsock
     WSADATA wsaData;
@@ -110,10 +114,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-
     // Crea un hilo para el servidor
     pthread_t serverTid;
-    pthread_create(&serverTid, nullptr, serverThread, nullptr);
+    pthread_create(&serverTid, nullptr, serverThread, &port); // Pasa el puerto como argumento
     pthread_join(serverTid, nullptr); // Espera a que el hilo del servidor termine
 
     WSACleanup();     // Limpia los recursos de Winsock
