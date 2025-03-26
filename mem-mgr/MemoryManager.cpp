@@ -110,15 +110,4 @@ void MemoryManager::garbageCollection() {
             this->usedSize = this->map->defragment(this->memoryBlock);
         }
     }
-
-void MemoryManager::run() {
-    int id1 = this->create(sizeof(int), TYPE_INT);
-    int id2 = this->create(sizeof(float), TYPE_FLOAT);
-    int id3 = this->create(sizeof(char), TYPE_CHAR);
-
-    this->set(id1, 42);
-    this->set(id2, 3.14f);
-    this->set(id3, 'A');
-
-    this->map->clear();
 }
