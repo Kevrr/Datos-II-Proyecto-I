@@ -12,7 +12,6 @@ MemoryManager::MemoryManager(int size, std::string path) {
     this->memoryBlock = malloc(size);
     this->usedSize = 0;
     this->currentID = 0;
-    this->dumpPath = path;
     this->map = new MemoryMap(path);
 }
 
@@ -22,6 +21,7 @@ MemoryManager::MemoryManager(int size, std::string path) {
  */
 MemoryManager::~MemoryManager() {
     delete(this->map);
+    this->map = nullptr;
     free(this->memoryBlock);
 }
 
@@ -102,6 +102,14 @@ void MemoryManager::decreaseRefCount(int id) {
         memNode->refCount--;
     }
 }
+
+
+void MemoryManager::garbageCollection() {
+    while(this->map != nullptr) {
+        if (this->map->clean()) {
+            this->usedSize = this->map->defragment(this->memoryBlock);
+        }
+    }
 
 void MemoryManager::run() {
     int id1 = this->create(sizeof(int), TYPE_INT);
