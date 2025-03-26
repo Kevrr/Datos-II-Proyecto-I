@@ -104,9 +104,9 @@ void MemoryManager::decreaseRefCount(int id) {
 }
 
 void MemoryManager::run() {
-    int id1 = this->create(sizeof(int), INT);
-    int id2 = this->create(sizeof(float), FLOAT);
-    int id3 = this->create(sizeof(char), CHAR);
+    int id1 = this->create(sizeof(int), TYPE_INT);
+    int id2 = this->create(sizeof(float), TYPE_FLOAT);
+    int id3 = this->create(sizeof(char), TYPE_CHAR);
 
     this->set(id1, 42);
     this->set(id2, 3.14f);

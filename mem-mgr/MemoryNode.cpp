@@ -1,10 +1,10 @@
 #include <cstdlib>
 
 enum DataType {
-    INT,
-    FLOAT,
-    CHAR,
-    UNKNOWN
+    TYPE_INT,
+    TYPE_FLOAT,
+    TYPE_CHAR,
+    TYPE_UNKNOWN
 };
 
 struct MemoryNode {

@@ -6,7 +6,7 @@
 #include <pthread.h>     // Para manejo de hilos
 #include <fstream>
 #pragma comment(lib, "Ws2_32.lib") // Vincula la biblioteca Ws2_32.lib para usar Winsock
-//#include "mem-mgr/MemoryManager.cpp"
+#include "../mem-mgr/MemoryManager.cpp"
 
 
 // Variables globales
