@@ -21,7 +21,8 @@ class MemoryMap {
     void clear();
     MemoryNode* find(int id);
     void add(int id, size_t size, DataType type, void* ptr);
-    void clean();
+    bool clean();
+    size_t defragment(void* startingAddress);
 };
 
 #endif

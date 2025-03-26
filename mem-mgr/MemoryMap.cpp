@@ -20,6 +20,44 @@ MemoryMap::~MemoryMap() {
 }
 
 /**
+ * @brief method that creates a txt with the current state of the memory map
+ * 
+ */
+void MemoryMap::dump() {
+    char currentTime[100];
+    time_t t = time(nullptr);
+    tm* timePtr = localtime(&t);
+    strftime(currentTime, sizeof(currentTime), "%B_%d_%Y_%H-%M-%S", timePtr);
+
+    std::string name = currentTime;
+    name.append(" (");
+    name += std::to_string(this->files);
+    name.append(")");
+    name.append(".txt");
+
+    std::string outPath = this->dumpPath;
+    std::string fileName = outPath.append(name);
+    std::ofstream file(fileName);
+    if (!file) {
+        std::cerr << "couldn't open file " << fileName << std::endl;
+        perror("Error details");
+        return;
+    }
+    this->files++;
+    file << "Memory Map:\n";
+    MemoryNode* temp = head;
+    while (temp != nullptr) {
+        file << "ID: " << temp->id
+             << ", Size: " << temp->size
+             << ", Type: " << temp->type
+             << ", Address: " << temp->ptr
+             << "\n";
+        temp = temp->next;
+    }
+    file.close();
+}
+
+/**
  * @brief method to delete all memory cells in the memory map
  * 
  */
@@ -74,7 +112,9 @@ void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
  * @brief method that deletes all memory cells with no references
  * 
  */
-void MemoryMap::clean() {
+bool MemoryMap::clean() {
+    bool deleted = false;
+
     MemoryNode* current = this->head;
     MemoryNode* prev = nullptr;
 
@@ -87,6 +127,7 @@ void MemoryMap::clean() {
             } else {
                 this->head = current->next;
             }
+            deleted = true;
         }
         prev = current;
         current = current->next;
@@ -95,42 +136,20 @@ void MemoryMap::clean() {
         }
     }
     this->dump();
+    return deleted;
 }
 
-/**
- * @brief method that creates a txt with the current state of the memory map
- * 
- */
-void MemoryMap::dump() {
-    char currentTime[100];
-    time_t t = time(nullptr);
-    tm* timePtr = localtime(&t);
-    strftime(currentTime, sizeof(currentTime), "%B_%d_%Y_%H-%M-%S", timePtr);
-
-    std::string name = currentTime;
-    name.append(" (");
-    name += std::to_string(this->files);
-    name.append(")");
-    name.append(".txt");
-
-    std::string outPath = this->dumpPath;
-    std::string fileName = outPath.append(name);
-    std::ofstream file(fileName);
-    if (!file) {
-        std::cerr << "couldn't open file " << fileName << std::endl;
-        perror("Error details");
-        return;
-    }
-    this->files++;
-    file << "Memory Map:\n";
+size_t MemoryMap::defragment(void* startingAddress) {
+    size_t currentUsedSize = 0;
     MemoryNode* temp = head;
     while (temp != nullptr) {
-        file << "ID: " << temp->id
-             << ", Size: " << temp->size
-             << ", Type: " << temp->type
-             << ", Address: " << temp->ptr
-             << "\n";
+        void* newPtr = static_cast<char*>(startingAddress) + currentUsedSize;
+        if (newPtr != temp->ptr) {
+            memmove(newPtr, temp->ptr, temp->size);
+            temp->ptr = newPtr;
+        }
+        currentUsedSize += temp->size;
         temp = temp->next;
     }
-    file.close();
+    return currentUsedSize;
 }
