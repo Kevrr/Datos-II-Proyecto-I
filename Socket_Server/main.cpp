@@ -6,79 +6,127 @@
 #include <pthread.h>     // Para manejo de hilos
 #include <fstream>
 #pragma comment(lib, "Ws2_32.lib") // Vincula la biblioteca Ws2_32.lib para usar Winsock
-#include "../mem-mgr/MemoryManager.cpp"
+#include "../mem-mgr/MemoryManager.h"
+//#include "../mem-mgr/MemoryManager.cpp"
 
 
 // Variables globales
 size_t memSize;
 
 // Función para crear un bloque de memoria 
-int Create(size_t size, const std::string& type) {
+int Create(MemoryManager& memoryManager, size_t size, const std::string& type) {
+    DataType dataType;
 
-    return 1;        
+    if (type == "int") {
+        dataType = TYPE_INT;
+    } else if (type == "float") {
+        dataType = TYPE_FLOAT;
+    } else if (type == "char") {
+        dataType = TYPE_CHAR;
+    } else {
+        return 0; // Retorna error si el tipo no es válido
+    }
+
+    int res = memoryManager.create(size, dataType);
+    return res != -1;     
 }
 
-int Set(int id, const std::string& value) {
+int Set(MemoryManager& memoryManager, int id, const std::string& value) {
+    /*int res = memoryManager.set(id, value);
+    return res != -1;   */
     return 1;
 }
 
-int Get(int id) {
-    return 1;
+template <typename T>
+int Get(MemoryManager& memoryManager, int id) {
+    /*//T value; // Variable para almacenar el valor obtenido
+    T res = memoryManager.get<T>(id); // Elimina el puntero
+    if (res != nullptr) {
+        //value = *static_cast<T*>(res); // Convierte el puntero a tipo T
+        //std::cout << "Valor: " << value << std::endl; // Imprime el valor
+        return 1; // Éxito
+    }*/
+    return 1; // Error
 }
 
-int IncreaseRefCount(int id) {
-    return 1;
+
+int IncreaseRefCount(MemoryManager& memoryManager, int id) {
+    int res = memoryManager.increaseRefCount(id);
+    return res != -1; 
 }
 
-int DecreaseRefCount(int id) {
-    return 1;
+int DecreaseRefCount(MemoryManager& memoryManager, int id) {
+    int res = memoryManager.decreaseRefCount(id);
+    return res != -1; 
 }
 
 // Función para manejar la conexión con un cliente
 void* handleClient(void* arg) {
-    int clientSocket = *(int*)arg; // Obtiene el socket del cliente
+    auto* clientData = (std::pair<int, MemoryManager*>*)arg; // Obtiene el socket y el MemoryManager
+    int clientSocket = clientData->first;
+    MemoryManager& memoryManager = *(clientData->second);
+
     char buffer[256] = {0};        // Buffer para recibir datos
     recv(clientSocket, buffer, sizeof(buffer), 0); // Recibe la solicitud del cliente
 
     std::string request(buffer);  // Convierte el buffer a string
     std::string response;         // Respuesta al cliente
     int result = 0;               // Resultado de la operación
+    int value = 0;                // Valor a enviar al cliente
 
     // Procesa las solicitudes del cliente
     if (request.find("CREATE") == 0) {
         size_t size;
         char type[50];
         sscanf(request.c_str(), "CREATE %zu %s", &size, type); // Extrae los parámetros
-        result = Create(size, type);                          // Crea el bloque de memoria
+        result = Create(memoryManager, size, type);           // Crea el bloque de memoria
     } else if (request.find("SET", 0) == 0) {
-        int id;
+        /*int id;
         char value[50];
         sscanf(request.c_str(), "SET %d %s", &id, value); // Extrae los parámetros
-        result = Set(id, value);                      // Establece el valor del bloque de memoria
+        result = Set(memoryManager, id, value);    */      // Establece el valor del bloque de memoria
     } else if (request.find("GET", 0) == 0) {
-        int id;
-        sscanf(request.c_str(), "GET %d", &id); // Extrae el parámetro
-        result = Get(id);                   // Obtiene el valor del bloque de memoria
-    } else if (request.find("INCREASEREFCOUNT", 0) == 0) {
+        /*int id;
+        sscanf(request.c_str(), "GET %d", &id);          // Extrae el parámetro
+        result = Get<void*>(memoryManager, id);           // Obtiene el valor del bloque de memoria
+        if (result == 1) {
+            void* valuePtr = memoryManager.get<void*>(id); // Obtiene el puntero genérico al bloque de memoria
+            if (valuePtr != nullptr) {
+            //response = "VALUE " + std::to_string(*static_cast<int*>(valuePtr)); // Convierte el valor a int como ejemplo
+            result = 1; // Éxito
+            } else {
+            //response = "ERROR"; // Error si el puntero es nulo
+            result = 0;
+            }
+        }*/
+        } else if (request.find("INCREASEREFCOUNT", 0) == 0) {
         int id;
         sscanf(request.c_str(), "INCREASEREFCOUNT %d", &id); // Extrae el parámetro
-        result = IncreaseRefCount(id);                // Incrementa el contador de referencias
+        value = id;
+        result = IncreaseRefCount(memoryManager, id);            // Incrementa el contador de referencias
     } else if (request.find("DECREASEREFCOUNT", 0) == 0) {
         int id;
         sscanf(request.c_str(), "DECREASEREFCOUNT %d", &id); // Extrae el parámetro
-        result = DecreaseRefCount(id);                // Decrementa el contador de referencias
+        result = DecreaseRefCount(memoryManager, id);       // Decrementa el contador de referencias
     } 
 
     response = (result == 1) ? "OK" : "ERROR";        // Genera la respuesta
+    if (result == 1) {
+        response += " " + std::to_string(value); // Agrega el valor a la respuesta
+    }
 
     send(clientSocket, response.c_str(), response.size(), 0); // Envía la respuesta al cliente
     closesocket(clientSocket);                                // Cierra el socket del cliente
+    delete clientData;                                        // Libera la memoria del argumento
     return nullptr;
 }
 
 // Función para manejar el servidor de sockets
 void* serverThread(void* arg) {
-    int port = *(int*)arg; // Obtiene el puerto desde el argumento
+    auto* serverData = (std::pair<int, MemoryManager*>*)arg; // Obtiene el puerto y el MemoryManager
+    int port = serverData->first;
+    MemoryManager& memoryManager = *(serverData->second);
+
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0); // Crea el socket del servidor
     sockaddr_in serverAddr = {};                       // Configura la dirección del servidor
     serverAddr.sin_family = AF_INET;                   // Familia de direcciones IPv4
@@ -90,22 +138,26 @@ void* serverThread(void* arg) {
 
     while (true) {
         int clientSocket = accept(serverSocket, nullptr, nullptr); // Acepta una conexión
+        auto* clientData = new std::pair<int, MemoryManager*>(clientSocket, &memoryManager); // Prepara los datos del cliente
         pthread_t clientThread;                                   // Crea un hilo para manejar al cliente
-        pthread_create(&clientThread, nullptr, handleClient, &clientSocket);
+        pthread_create(&clientThread, nullptr, handleClient, clientData);
         pthread_detach(clientThread); // Desvincula el hilo para que se limpie automáticamente
     }
 }
 
 int main(int argc, char* argv[]) {
-    
-    if (argc != 3) {
-        std::cerr << "Uso: ./mem-mgr <PORT> <SIZE_MB>" << std::endl;
+    if (argc != 4) {
+        std::cerr << "Uso: ./mem-mgr <LISTEN_PORT> <SIZE_MB> <DUMP_FOLDER>" << std::endl;
         return 1;
     }
 
     // Calcula el tamaño del pool de memoria en bytes
     memSize = atoi(argv[2]) * 1024 * 1024;
     int port = atoi(argv[1]);
+    std::string dumpFolder = argv[3];
+
+    // Crea el administrador de memoria
+    MemoryManager memoryManager(memSize, dumpFolder);  
 
     // Inicializa Winsock
     WSADATA wsaData;
@@ -115,8 +167,9 @@ int main(int argc, char* argv[]) {
     }
 
     // Crea un hilo para el servidor
+    auto* serverData = new std::pair<int, MemoryManager*>(port, &memoryManager); // Prepara los datos del servidor
     pthread_t serverTid;
-    pthread_create(&serverTid, nullptr, serverThread, &port); // Pasa el puerto como argumento
+    pthread_create(&serverTid, nullptr, serverThread, serverData); // Pasa el puerto y el MemoryManager como argumento
     pthread_join(serverTid, nullptr); // Espera a que el hilo del servidor termine
 
     WSACleanup();     // Limpia los recursos de Winsock

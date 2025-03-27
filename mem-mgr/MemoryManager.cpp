@@ -53,11 +53,13 @@ int MemoryManager::create(size_t size, DataType type) {
  * @param value value to save in the address
  */
 template<typename T>
-void MemoryManager::set(int id, T value) {
+int MemoryManager::set(int id, T value) {
     void* ptr = this->map->find(id)->ptr;
     if (ptr != nullptr) {
         *reinterpret_cast<T*>(ptr) = value;
+        return 1;
     }
+    return -1;
 }
 
 /**
@@ -73,6 +75,7 @@ T MemoryManager::get(int id) {
     if (ptr != nullptr) {
         return *reinterpret_cast<T*>(ptr);
     }
+    return -1;
 }
 
 /**
@@ -80,15 +83,17 @@ T MemoryManager::get(int id) {
  * 
  * @param id identifier for the cell
  */
-void MemoryManager::increaseRefCount(int id) {
+int MemoryManager::increaseRefCount(int id) {
     MemoryNode* memNode = this->map->find(id);
     if (memNode != nullptr) {
+        // Ensure reference count is always non-negative
         if (memNode->refCount < 0) {
-            memNode->refCount = 1;
-        } else {
-            memNode->refCount++;
+            memNode->refCount = 0; // Reset to 0 if negative
         }
+        memNode->refCount++;
+        return 1;
     }
+    return -1;
 }
 
 /**
@@ -96,11 +101,13 @@ void MemoryManager::increaseRefCount(int id) {
  * 
  * @param id identifier for the cell
  */
-void MemoryManager::decreaseRefCount(int id) {
+int MemoryManager::decreaseRefCount(int id) {
     MemoryNode* memNode = this->map->find(id);
     if (memNode != nullptr) {
         memNode->refCount--;
+        return 1;
     }
+    return -1;
 }
 
 void MemoryManager::run() {

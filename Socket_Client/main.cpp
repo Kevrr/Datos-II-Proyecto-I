@@ -53,12 +53,12 @@ string sendRequest(string serverIP, int port, const string& request) {
 int main() {
     // Dirección IP y puerto del servidor
     string serverIP = "127.0.0.1"; // IP del servidor (localhost)
-    int port = 8080;              // Puerto del servidor
+    int port = 1515;              // Puerto del servidor
 
     // Envía solicitudes al servidor y muestra las respuestas
     cout << "Server Response: " << sendRequest(serverIP, port, "CREATE 128") << endl; 
-    cout << "Server Response: " << sendRequest(serverIP, port, "SET 1 100") << endl;  
-    cout << "Server Response: " << sendRequest(serverIP, port, "GET 1") << endl;      
+    //cout << "Server Response: " << sendRequest(serverIP, port, "SET 1 100") << endl;
+    //cout << "Server Response: " << sendRequest(serverIP, port, "GET 1") << endl;
     cout << "Server Response: " << sendRequest(serverIP, port, "INCREASEREFCOUNT 1") << endl; 
     cout << "Server Response: " << sendRequest(serverIP, port, "DECREASEREFCOUNT 1") << endl; 
 

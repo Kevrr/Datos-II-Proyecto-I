@@ -44,6 +44,7 @@ MemoryNode* MemoryMap::find(int id) {
         if (current->id == id) {
             return current;
         }
+        current = current->next;
     }
     return nullptr;
 }

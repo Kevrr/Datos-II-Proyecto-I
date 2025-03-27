@@ -18,11 +18,11 @@ class MemoryManager {
     MemoryManager(int size, std::string path);
     int create(size_t size, DataType type);
     template<typename T>
-    void set(int id, T value);
+    int set(int id, T value);
     template<typename T>
     T get(int id);
-    void increaseRefCount(int id);
-    void decreaseRefCount(int id);
+    int increaseRefCount(int id);
+    int decreaseRefCount(int id);
     ~MemoryManager();
     void run();
 };
