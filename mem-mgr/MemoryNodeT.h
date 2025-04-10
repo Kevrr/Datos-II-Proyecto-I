@@ -10,11 +10,10 @@ class MemoryNodeT: public MemoryNode {
 
     public:
     MemoryNodeT(int id, size_t size, DataType type, void* ptr);
-    T* constgetAddress();
-    void setAddress(void* newPtr);
-    std::string getValue();
-    template <typename U>
-    void setValue(U value);
+    T* getAddress() override;
+    void setAddress(void* newPtr) override;
+    std::string getValue() override;
+    void setValue(T data);
 };
 
 #endif

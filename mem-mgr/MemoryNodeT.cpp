@@ -23,15 +23,13 @@ void MemoryNodeT<T>::setAddress(void* newPtr) {
 template<typename T>
 std::string MemoryNodeT<T>::getValue() {
     if (this->ptr != nullptr) {
-        T value = *reinterpret_cast<T*>(this->ptr);
+        T value = *this->ptr;
         return std::to_string(value);
     }
+    return "null";
 }
 
 template<typename T>
-template<typename U>
-void MemoryNodeT<T>::setValue(U data) {
-    if (std::is_same<T, U>::value) {
-        *this->ptr = data;
-    }
+void MemoryNodeT<T>::setValue(T data) {
+    *this->ptr = data;
 }
