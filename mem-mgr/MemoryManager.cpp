@@ -10,9 +10,11 @@
 MemoryManager::MemoryManager(int size, std::string path) {
     this->totalSize = size;
     this->memoryBlock = malloc(size);
+    if (this->memoryBlock == nullptr) {
+        throw std::bad_alloc();
+    }
     this->usedSize = 0;
     this->currentID = 0;
-    this->dumpPath = path;
     this->map = new MemoryMap(path);
 }
 
@@ -22,6 +24,7 @@ MemoryManager::MemoryManager(int size, std::string path) {
  */
 MemoryManager::~MemoryManager() {
     delete(this->map);
+    this->map = nullptr;
     free(this->memoryBlock);
 }
 
@@ -53,29 +56,26 @@ int MemoryManager::create(size_t size, DataType type) {
  * @param value value to save in the address
  */
 template<typename T>
-int MemoryManager::set(int id, T value) {
-    void* ptr = this->map->find(id)->ptr;
-    if (ptr != nullptr) {
-        *reinterpret_cast<T*>(ptr) = value;
-        return 1;
+void MemoryManager::set(int id, T value) {
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        *reinterpret_cast<T*>(node->getAddress()) = value;
     }
-    return -1;
+    this->map->dump();
 }
 
 /**
  * @brief method to get the value in a memory cell
  * 
- * @tparam T type saved in the cell
  * @param id identifier for the cell
- * @return T value saved in the cell
+ * @return string value saved in the cell
  */
-template<typename T>
-T MemoryManager::get(int id) {
-    void* ptr = this->map->find(id)->ptr;
-    if (ptr != nullptr) {
-        return *reinterpret_cast<T*>(ptr);
+std::string MemoryManager::get(int id) {
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        return node->getValue();
     }
-    return -1;
+    return "invalid ID";
 }
 
 /**
@@ -83,15 +83,10 @@ T MemoryManager::get(int id) {
  * 
  * @param id identifier for the cell
  */
-int MemoryManager::increaseRefCount(int id) {
-    MemoryNode* memNode = this->map->find(id);
-    if (memNode != nullptr) {
-        // Ensure reference count is always non-negative
-        if (memNode->refCount < 0) {
-            memNode->refCount = 0; // Reset to 0 if negative
-        }
-        memNode->refCount++;
-        return 1;
+void MemoryManager::increaseRefCount(int id) {
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        node->increaseRefCount();
     }
     return -1;
 }
@@ -101,23 +96,18 @@ int MemoryManager::increaseRefCount(int id) {
  * 
  * @param id identifier for the cell
  */
-int MemoryManager::decreaseRefCount(int id) {
-    MemoryNode* memNode = this->map->find(id);
-    if (memNode != nullptr) {
-        memNode->refCount--;
-        return 1;
+void MemoryManager::decreaseRefCount(int id) {
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        node->decreaseRefCount();
     }
     return -1;
 }
 
-void MemoryManager::run() {
-    int id1 = this->create(sizeof(int), TYPE_INT);
-    int id2 = this->create(sizeof(float), TYPE_FLOAT);
-    int id3 = this->create(sizeof(char), TYPE_CHAR);
-
-    this->set(id1, 42);
-    this->set(id2, 3.14f);
-    this->set(id3, 'A');
-
-    this->map->clear();
+void MemoryManager::garbageCollection() {
+    while(this->map != nullptr) {
+        if (this->map->clean()) {
+            this->usedSize = this->map->defragment(this->memoryBlock);
+        }
+    }
 }

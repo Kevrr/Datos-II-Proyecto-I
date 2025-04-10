@@ -1,0 +1,18 @@
+#ifndef MEMORYNODET_H
+#define MEMORYNODET_H
+
+#include "MemoryNode.h"
+
+template <typename T>
+class MemoryNodeT: public MemoryNode {
+    private:
+    T* ptr;
+
+    public:
+    MemoryNodeT(int id, size_t size, DataType type, void* ptr);
+    void* getAddress() override;
+    void setAddress(void* newPtr) override;
+    std::string getValue() override;
+};
+
+#endif

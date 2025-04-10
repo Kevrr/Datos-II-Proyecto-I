@@ -1,25 +1,44 @@
-#include <cstdlib>
+#include "MemoryNode.h"
 
-enum DataType {
-    TYPE_INT,
-    TYPE_FLOAT,
-    TYPE_CHAR,
-    TYPE_UNKNOWN
-};
+MemoryNode::MemoryNode(int id, size_t size, DataType type) {
+    this->id = id;
+    this->size = size;
+    this->type = type;
+    this->refCount = -1;
+    this->next = nullptr;
+}
 
-struct MemoryNode {
-    int id;
-    size_t size;
-    DataType type;
-    int refCount;
-    void* ptr;
-    MemoryNode* next;
-    MemoryNode (int id, size_t size, DataType type, void* ptr) {
-        this->id = id;
-        this->size = size;
-        this->type = type;
-        this->ptr = ptr;
-        this->refCount = -1;
-        this->next = nullptr;
+MemoryNode* MemoryNode::getNext() {
+    return this->next;
+}
+
+void MemoryNode::setNext(MemoryNode* newNode) {
+    this->next = newNode;
+}
+
+int MemoryNode::getID() {
+    return this->id;
+}
+
+size_t MemoryNode::getSize() {
+    return this->size;
+}
+
+DataType MemoryNode::getType() {
+    return this->type;
+}
+
+int MemoryNode::getRefCount() {
+    return this->refCount;
+}
+
+void MemoryNode::increaseRefCount() {
+    if (this->refCount < 0) {
+        this->refCount = 0;
     }
-};
+    this->refCount++;
+}
+
+void MemoryNode::decreaseRefCount() {
+    this->refCount--;
+}

@@ -1,4 +1,5 @@
 #include "MemoryMap.h"
+#include "MemoryNodeT.cpp"
 
 /**
  * @brief Construct a new Memory Map
@@ -9,93 +10,6 @@ MemoryMap::MemoryMap(std::string path) {
     this->head = nullptr;
     this->dumpPath = path;
     this->files = 1;
-}
-
-/**
- * @brief Destroy the Memory Map, clearing all its memory cells first
- * 
- */
-MemoryMap::~MemoryMap() {
-    this->clear();
-}
-
-/**
- * @brief method to delete all memory cells in the memory map
- * 
- */
-void MemoryMap::clear() {
-    while (this->head != nullptr) {
-        MemoryNode* temp = this->head;
-        this->head = this->head->next;
-        delete(temp);
-    }
-    this->dump();
-}
-
-/**
- * @brief method to find an memory cell given its ID
- * 
- * @param id 
- * @return MemoryNode* 
- */
-MemoryNode* MemoryMap::find(int id) {
-    MemoryNode* current = this->head;
-    while (current != nullptr) {
-        if (current->id == id) {
-            return current;
-        }
-        current = current->next;
-    }
-    return nullptr;
-}
-
-/**
- * @brief method to create an memory cell
- * 
- * @param id ID for the memory cell
- * @param size size of the memory cell
- * @param type type for the value to be saved in the memory cell
- * @param ptr address of the given space
- */
-void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
-    MemoryNode* newNode = new MemoryNode(id, size, type, ptr);
-    if (this->head == nullptr) {
-        this->head = newNode;
-    } else {
-        MemoryNode* current = this->head;
-        while (current->next != nullptr) {
-            current = current->next;
-        }
-        current->next = newNode;
-    }
-    this->dump();
-}
-
-/**
- * @brief method that deletes all memory cells with no references
- * 
- */
-void MemoryMap::clean() {
-    MemoryNode* current = this->head;
-    MemoryNode* prev = nullptr;
-
-    while (current != nullptr) {
-        MemoryNode* temp = nullptr;
-        if (current->refCount == 0) {
-            temp = current;
-            if (prev != nullptr) {
-                prev->next = current->next;
-            } else {
-                this->head = current->next;
-            }
-        }
-        prev = current;
-        current = current->next;
-        if (temp != nullptr) {
-            delete(temp);
-        }
-    }
-    this->dump();
 }
 
 /**
@@ -126,12 +40,136 @@ void MemoryMap::dump() {
     file << "Memory Map:\n";
     MemoryNode* temp = head;
     while (temp != nullptr) {
-        file << "ID: " << temp->id
-             << ", Size: " << temp->size
-             << ", Type: " << temp->type
-             << ", Address: " << temp->ptr
+        file << "ID: " << temp->getID()
+             << ", Size: " << temp->getSize()
+             << ", Type: " << temp->getType()
+             << ", Address: " << temp->getAddress()
+             << ", Value: " << temp->getValue()
              << "\n";
-        temp = temp->next;
+        temp = temp->getNext();
     }
     file.close();
+}
+
+/**
+ * @brief method to delete all memory cells in the memory map
+ * 
+ */
+void MemoryMap::clear() {
+    while (this->head != nullptr) {
+        MemoryNode* temp = this->head;
+        this->head = this->head->getNext();
+        delete(temp);
+    }
+    this->dump();
+}
+
+/**
+ * @brief method to find an memory cell given its ID
+ * 
+ * @param id 
+ * @return MemoryNode* 
+ */
+MemoryNode* MemoryMap::find(int id) {
+    MemoryNode* current = this->head;
+    while (current != nullptr) {
+        if (current->getID() == id) {
+            return current;
+        }
+        current = current->getNext();
+    }
+    return nullptr;
+}
+
+/**
+ * @brief method to create an memory cell
+ * 
+ * @param id ID for the memory cell
+ * @param size size of the memory cell
+ * @param type type for the value to be saved in the memory cell
+ * @param ptr address of the given space
+ */
+void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
+    MemoryNode* newNode;
+    switch (type) {
+        case 0: 
+        newNode = new MemoryNodeT<int>(id, size, type, ptr);
+        break;
+        case 1:
+        newNode = new MemoryNodeT<char>(id, size, type, ptr);
+        break;
+        case 2:
+        newNode = new MemoryNodeT<bool>(id, size, type, ptr);
+        break;
+        case 3:
+        newNode = new MemoryNodeT<float>(id, size, type, ptr);
+        break;
+        case 4:
+        newNode = new MemoryNodeT<double>(id, size, type, ptr);
+        break;
+        default:
+        newNode = nullptr;
+        break;
+    }
+    
+    if (this->head == nullptr) {
+        this->head = newNode;
+    } else {
+        MemoryNode* current = this->head;
+        while (current->getNext() != nullptr) {
+            current = current->getNext();
+        }
+        current->setNext(newNode);
+    }
+    this->dump();
+}
+
+/**
+ * @brief method that deletes all memory cells with no references
+ * 
+ */
+bool MemoryMap::clean() {
+    bool deleted = false;
+    MemoryNode* current = this->head;
+    MemoryNode* prev = nullptr;
+
+    while (current != nullptr) {
+        MemoryNode* temp = nullptr;
+        if (current->getRefCount() == 0) {
+            temp = current;
+            if (prev != nullptr) {
+                prev->setNext(current->getNext());
+            } else {
+                this->head = current->getNext();
+            }
+            deleted = true;
+        }
+        prev = current;
+        current = current->getNext();
+        if (temp != nullptr) {
+            delete(temp);
+        }
+    }
+    this->dump();
+    return deleted;
+}
+
+/**
+ * @brief Destroy the Memory Map, clearing all its memory cells first
+ * 
+ */
+MemoryMap::~MemoryMap() {
+    this->clear();
+}
+
+size_t MemoryMap::defragment(void* startingAddress) {
+    size_t currentUsedSize = 0;
+    MemoryNode* temp = head;
+    while (temp != nullptr) {
+        void* newPtr = static_cast<char*>(startingAddress) + currentUsedSize;
+        temp->setAddress(newPtr);
+        currentUsedSize += temp->getSize();
+        temp = temp->getNext();
+    }
+    return currentUsedSize;
 }

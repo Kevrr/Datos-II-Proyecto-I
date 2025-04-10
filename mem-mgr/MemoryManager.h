@@ -12,19 +12,17 @@ class MemoryManager {
     size_t usedSize;
     int currentID;
     MemoryMap* map;
-    std::string dumpPath;
 
     public:
     MemoryManager(int size, std::string path);
     int create(size_t size, DataType type);
     template<typename T>
-    int set(int id, T value);
-    template<typename T>
-    T get(int id);
-    int increaseRefCount(int id);
-    int decreaseRefCount(int id);
+    void set(int id, T value);
+    std::string get(int id);
+    void increaseRefCount(int id);
+    void decreaseRefCount(int id);
+    void garbageCollection();
     ~MemoryManager();
-    void run();
 };
 
 #endif

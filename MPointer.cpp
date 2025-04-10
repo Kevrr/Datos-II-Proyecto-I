@@ -22,7 +22,8 @@ T& MPointer<T>::operator*(){
 }
 
 template <typename T>
-void MPointer<T>::operator=(const T& data) {
+template <typename U>
+void MPointer<T>::operator=(const U& data) {
     if (typeid(data) == typeid(MPointer<T>*)) {
         this->id = data->getID();
         sendRequest(serverIP, port, "INCREASEREFCOUNT 1")
