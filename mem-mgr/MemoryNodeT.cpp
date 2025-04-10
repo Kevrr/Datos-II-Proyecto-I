@@ -28,6 +28,9 @@ template<typename T>
 std::string MemoryNodeT<T>::getValue() {
     if (this->ptr != nullptr) {
         T value = *this->ptr;
+        if constexpr (std::is_same<T, char>::value) {
+            return std::string(1, value);
+        }
         return std::to_string(value);
     }
     return "null";
