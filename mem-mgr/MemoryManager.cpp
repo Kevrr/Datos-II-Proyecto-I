@@ -56,8 +56,9 @@ template<typename T>
 void MemoryManager::set(int id, T value) {
     MemoryNode* node = this->map->find(id);
     if (node != nullptr) {
-        node->setValue(value);
+        *reinterpret_cast<T*>(node->getAddress()) = value;
     }
+    this->map->dump();
 }
 
 /**
@@ -71,6 +72,7 @@ std::string MemoryManager::get(int id) {
     if (node != nullptr) {
         return node->getValue();
     }
+    return "invalid ID";
 }
 
 /**

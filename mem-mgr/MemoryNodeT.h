@@ -10,10 +10,9 @@ class MemoryNodeT: public MemoryNode {
 
     public:
     MemoryNodeT(int id, size_t size, DataType type, void* ptr);
-    T* getAddress() override;
+    void* getAddress() override;
     void setAddress(void* newPtr) override;
     std::string getValue() override;
-    void setValue(T data);
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "mem-mgr/MemoryManager.cpp"
 
 int main() {
-    MemoryManager* memmgr = new MemoryManager(1024, "/");
+    MemoryManager* memmgr = new MemoryManager(1024, "/files/");
     int id1 = memmgr->create(sizeof(int), TYPE_INT);
     int id2 = memmgr->create(sizeof(float), TYPE_FLOAT);
     int id3 = memmgr->create(sizeof(char), TYPE_CHAR);

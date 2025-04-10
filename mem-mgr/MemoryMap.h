@@ -13,10 +13,9 @@ class MemoryMap {
     std::string dumpPath;
     int files;
     
-    void dump();
-    
     public:
     MemoryMap(std::string path);
+    void dump();
     void clear();
     MemoryNode* find(int id);
     void add(int id, size_t size, DataType type, void* ptr);

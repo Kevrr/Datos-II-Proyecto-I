@@ -32,7 +32,6 @@ class MemoryNode {
     virtual void* getAddress();
     virtual void setAddress(void* newPtr);
     virtual std::string getValue();
-    virtual void setValue();
 };
 
 #endif

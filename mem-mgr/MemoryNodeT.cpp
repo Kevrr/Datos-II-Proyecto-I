@@ -8,8 +8,8 @@ MemoryNodeT<T>::MemoryNodeT(int id, size_t size, DataType type, void* ptr) : Mem
 }
 
 template<typename T>
-T* MemoryNodeT<T>::getAddress() {
-    return this->ptr;
+void* MemoryNodeT<T>::getAddress() {
+    return reinterpret_cast<void*>(this->ptr);
 }
 
 template<typename T>
@@ -27,9 +27,4 @@ std::string MemoryNodeT<T>::getValue() {
         return std::to_string(value);
     }
     return "null";
-}
-
-template<typename T>
-void MemoryNodeT<T>::setValue(T data) {
-    *this->ptr = data;
 }
