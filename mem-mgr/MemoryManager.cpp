@@ -54,24 +54,22 @@ int MemoryManager::create(size_t size, DataType type) {
  */
 template<typename T>
 void MemoryManager::set(int id, T value) {
-    void* ptr = this->map->find(id)->ptr;
-    if (ptr != nullptr) {
-        *reinterpret_cast<T*>(ptr) = value;
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        node->setValue(value);
     }
 }
 
 /**
  * @brief method to get the value in a memory cell
  * 
- * @tparam T type saved in the cell
  * @param id identifier for the cell
- * @return T value saved in the cell
+ * @return string value saved in the cell
  */
-template<typename T>
-T MemoryManager::get(int id) {
-    void* ptr = this->map->find(id)->ptr;
-    if (ptr != nullptr) {
-        return *reinterpret_cast<T*>(ptr);
+std::string MemoryManager::get(int id) {
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        return node->getValue();
     }
 }
 
@@ -81,13 +79,9 @@ T MemoryManager::get(int id) {
  * @param id identifier for the cell
  */
 void MemoryManager::increaseRefCount(int id) {
-    MemoryNode* memNode = this->map->find(id);
-    if (memNode != nullptr) {
-        if (memNode->refCount < 0) {
-            memNode->refCount = 1;
-        } else {
-            memNode->refCount++;
-        }
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        node->increaseRefCount();
     }
 }
 
@@ -97,12 +91,11 @@ void MemoryManager::increaseRefCount(int id) {
  * @param id identifier for the cell
  */
 void MemoryManager::decreaseRefCount(int id) {
-    MemoryNode* memNode = this->map->find(id);
-    if (memNode != nullptr) {
-        memNode->refCount--;
+    MemoryNode* node = this->map->find(id);
+    if (node != nullptr) {
+        node->decreaseRefCount();
     }
 }
-
 
 void MemoryManager::garbageCollection() {
     while(this->map != nullptr) {
@@ -110,15 +103,4 @@ void MemoryManager::garbageCollection() {
             this->usedSize = this->map->defragment(this->memoryBlock);
         }
     }
-
-void MemoryManager::run() {
-    int id1 = this->create(sizeof(int), TYPE_INT);
-    int id2 = this->create(sizeof(float), TYPE_FLOAT);
-    int id3 = this->create(sizeof(char), TYPE_CHAR);
-
-    this->set(id1, 42);
-    this->set(id2, 3.14f);
-    this->set(id3, 'A');
-
-    this->map->clear();
 }

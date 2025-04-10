@@ -1,4 +1,5 @@
 #include "MemoryMap.h"
+#include "MemoryNodeT.cpp"
 
 /**
  * @brief Construct a new Memory Map
@@ -9,14 +10,6 @@ MemoryMap::MemoryMap(std::string path) {
     this->head = nullptr;
     this->dumpPath = path;
     this->files = 1;
-}
-
-/**
- * @brief Destroy the Memory Map, clearing all its memory cells first
- * 
- */
-MemoryMap::~MemoryMap() {
-    this->clear();
 }
 
 /**
@@ -47,12 +40,13 @@ void MemoryMap::dump() {
     file << "Memory Map:\n";
     MemoryNode* temp = head;
     while (temp != nullptr) {
-        file << "ID: " << temp->id
-             << ", Size: " << temp->size
-             << ", Type: " << temp->type
-             << ", Address: " << temp->ptr
+        file << "ID: " << temp->getID()
+             << ", Size: " << temp->getSize()
+             << ", Type: " << temp->getType()
+             << ", Address: " << temp->getAddress()
+             << ", Value: " << temp->getValue()
              << "\n";
-        temp = temp->next;
+        temp = temp->getNext();
     }
     file.close();
 }
@@ -64,7 +58,7 @@ void MemoryMap::dump() {
 void MemoryMap::clear() {
     while (this->head != nullptr) {
         MemoryNode* temp = this->head;
-        this->head = this->head->next;
+        this->head = this->head->getNext();
         delete(temp);
     }
     this->dump();
@@ -79,9 +73,10 @@ void MemoryMap::clear() {
 MemoryNode* MemoryMap::find(int id) {
     MemoryNode* current = this->head;
     while (current != nullptr) {
-        if (current->id == id) {
+        if (current->getID() == id) {
             return current;
         }
+        current = current->getNext();
     }
     return nullptr;
 }
@@ -95,15 +90,30 @@ MemoryNode* MemoryMap::find(int id) {
  * @param ptr address of the given space
  */
 void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
-    MemoryNode* newNode = new MemoryNode(id, size, type, ptr);
+    MemoryNode* newNode;
+    switch (type) {
+        case 0: 
+        newNode = new MemoryNodeT<int>(id, size, type, ptr);
+        case 1:
+        newNode = new MemoryNodeT<char>(id, size, type, ptr);
+        case 2:
+        newNode = new MemoryNodeT<bool>(id, size, type, ptr);
+        case 3:
+        newNode = new MemoryNodeT<float>(id, size, type, ptr);
+        case 4:
+        newNode = new MemoryNodeT<double>(id, size, type, ptr);
+        default:
+        newNode = new MemoryNodeT<void>(id, size, type, ptr);
+    }
+    
     if (this->head == nullptr) {
         this->head = newNode;
     } else {
         MemoryNode* current = this->head;
-        while (current->next != nullptr) {
-            current = current->next;
+        while (current->getNext() != nullptr) {
+            current = current->getNext();
         }
-        current->next = newNode;
+        current->setNext(newNode);
     }
     this->dump();
 }
@@ -114,23 +124,22 @@ void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
  */
 bool MemoryMap::clean() {
     bool deleted = false;
-
     MemoryNode* current = this->head;
     MemoryNode* prev = nullptr;
 
     while (current != nullptr) {
         MemoryNode* temp = nullptr;
-        if (current->refCount == 0) {
+        if (current->getRefCount() == 0) {
             temp = current;
             if (prev != nullptr) {
-                prev->next = current->next;
+                prev->setNext(current->getNext());
             } else {
-                this->head = current->next;
+                this->head = current->getNext();
             }
             deleted = true;
         }
         prev = current;
-        current = current->next;
+        current = current->getNext();
         if (temp != nullptr) {
             delete(temp);
         }
@@ -139,17 +148,22 @@ bool MemoryMap::clean() {
     return deleted;
 }
 
+/**
+ * @brief Destroy the Memory Map, clearing all its memory cells first
+ * 
+ */
+MemoryMap::~MemoryMap() {
+    this->clear();
+}
+
 size_t MemoryMap::defragment(void* startingAddress) {
     size_t currentUsedSize = 0;
     MemoryNode* temp = head;
     while (temp != nullptr) {
         void* newPtr = static_cast<char*>(startingAddress) + currentUsedSize;
-        if (newPtr != temp->ptr) {
-            memmove(newPtr, temp->ptr, temp->size);
-            temp->ptr = newPtr;
-        }
-        currentUsedSize += temp->size;
-        temp = temp->next;
+        temp->setAddress(newPtr);
+        currentUsedSize += temp->getSize();
+        temp = temp->getNext();
     }
     return currentUsedSize;
 }

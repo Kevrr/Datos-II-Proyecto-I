@@ -19,11 +19,11 @@ class MemoryManager {
     int create(size_t size, DataType type);
     template<typename T>
     void set(int id, T value);
-    template<typename T>
-    T get(int id);
+    std::string get(int id);
     void increaseRefCount(int id);
     void decreaseRefCount(int id);
     void garbageCollection();
+    ~MemoryManager();
 };
 
 #endif

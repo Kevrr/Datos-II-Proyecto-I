@@ -1,7 +1,7 @@
 #ifndef MEMORYMAP_H
 #define MEMORYMAP_H
 
-#include "MemoryNode.cpp"
+#include "MemoryNodeT.h"
 #include <string>
 #include <ctime>
 #include <fstream>
@@ -17,12 +17,12 @@ class MemoryMap {
     
     public:
     MemoryMap(std::string path);
-    ~MemoryMap();
     void clear();
     MemoryNode* find(int id);
     void add(int id, size_t size, DataType type, void* ptr);
     bool clean();
     size_t defragment(void* startingAddress);
+    ~MemoryMap();
 };
 
 #endif

@@ -14,7 +14,8 @@ class MPointer {
     MPointer();
     int getID();
     T& operator*();
-    void operator=(const T& data);
+    template <typename U>
+    void operator=(const U& data);
     T& operator&();
     ~MPointer();
 };
