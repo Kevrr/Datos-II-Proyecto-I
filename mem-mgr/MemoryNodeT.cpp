@@ -30,6 +30,8 @@ std::string MemoryNodeT<T>::getValue() {
         T value = *this->ptr;
         if constexpr (std::is_same<T, char>::value) {
             return std::string(1, value);
+        } else if constexpr (std::is_same<T, bool>::value) {
+            return value ? "true" : "false";
         }
         return std::to_string(value);
     }
