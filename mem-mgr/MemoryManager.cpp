@@ -55,14 +55,7 @@ int MemoryManager::create(size_t size, DataType type) {
  * @param id identifier for the cell
  * @param value value to save in the address
  */
-template<typename T>
-void MemoryManager::set(int id, T value) {
-    MemoryNode* node = this->map->find(id);
-    if (node != nullptr) {
-        *reinterpret_cast<T*>(node->getAddress()) = value;
-    }
-    this->map->dump();
-}
+
 
 /**
  * @brief method to get the value in a memory cell
@@ -112,4 +105,8 @@ void MemoryManager::garbageCollection() {
             this->usedSize = this->map->defragment(this->memoryBlock);
         }
     }
+}
+
+MemoryNode* MemoryManager::getMemoryNodeById(int id) {
+    return this->map->find(id);
 }

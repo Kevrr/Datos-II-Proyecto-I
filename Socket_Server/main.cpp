@@ -23,18 +23,40 @@ int Create(MemoryManager& memoryManager, size_t size, const std::string& type) {
         dataType = TYPE_FLOAT;
     } else if (type == "char") {
         dataType = TYPE_CHAR;
+    } else if (type == "double") {
+        dataType = TYPE_DOUBLE;
+    } else if (type == "bool") {
+        dataType = TYPE_BOOL;
     } else {
         return 0; // Retorna error si el tipo no es válido
     }
+    std::cout << "[DEBUG] Crear bloque de memoria de tipo: " << type << " y tamaño: " << size << std::endl;
 
     int res = memoryManager.create(size, dataType);
     return res != -1;     
 }
 
-int Set(MemoryManager& memoryManager, int id, const std::string& value) {
-    /*int res = memoryManager.set(id, value);
-    return res != -1;   */
-    return 1;
+template <typename T>
+int Set(MemoryManager& memoryManager, int id, const std::string& valueString) {
+    T value; 
+
+    if constexpr (std::is_same<T,int>::value) {
+        value = std::stoi(valueString); // Convierte el string a int
+    } else if constexpr (std::is_same<T,float>::value) {
+        value = std::stof(valueString); // Convierte el string a float
+    } else if constexpr (std::is_same<T,char>::value) {
+        value = valueString[0]; // Toma el primer carácter del string
+    } else if constexpr (std::is_same<T,double>::value){
+        value = std::stod(valueString); // Convierte el string a double
+    } else if constexpr (std::is_same<T,bool>::value){
+        value = (valueString == "true") ? true : false; // Convierte el string a bool
+    }else {
+        return 0; // Retorna error si el tipo no es válido
+    }
+
+
+    int res = memoryManager.set(id, value);
+    return res != -1;
 }
 
 template <typename T>
@@ -81,10 +103,33 @@ void* handleClient(void* arg) {
         sscanf(request.c_str(), "CREATE %zu %s", &size, type); // Extrae los parámetros
         result = Create(memoryManager, size, type);           // Crea el bloque de memoria
     } else if (request.find("SET", 0) == 0) {
-        /*int id;
-        char value[50];
-        sscanf(request.c_str(), "SET %d %s", &id, value); // Extrae los parámetros
-        result = Set(memoryManager, id, value);    */      // Establece el valor del bloque de memoria
+        int id;
+        char valueBuffer[256];
+        sscanf(request.c_str(), "SET %d %s", &id, valueBuffer); // Extrae los parámetros
+        std::string valueStr(valueBuffer);
+
+        // Eliminar las comillas si están presentes
+        if (valueStr.front() == '\'' && valueStr.back() == '\'') {
+            valueStr = valueStr.substr(1, valueStr.size() - 2);
+        }
+
+        MemoryNode* node = memoryManager.getMemoryNodeById(id); // Busca el nodo en el administrador de memoria
+        DataType type = node->getType(); // Obtiene el tipo de dato del nodo
+        
+        if (type == TYPE_INT) {
+            result = Set<int>(memoryManager, id, valueStr);
+        } else if (type == TYPE_FLOAT) {
+            result = Set<float>(memoryManager, id, valueStr);
+        } else if (type == TYPE_CHAR) {
+            result = Set<char>(memoryManager, id, valueStr);
+        } else if (type == TYPE_DOUBLE) {
+            result = Set<double>(memoryManager, id, valueStr);
+        } else if (type == TYPE_BOOL) {
+            result = Set<bool>(memoryManager, id, valueStr);
+        } else {
+            result = 0; // o error
+        }
+        
     } else if (request.find("GET", 0) == 0) {
         /*int id;
         sscanf(request.c_str(), "GET %d", &id);          // Extrae el parámetro
@@ -111,9 +156,6 @@ void* handleClient(void* arg) {
     } 
 
     response = (result == 1) ? "OK" : "ERROR";        // Genera la respuesta
-    if (result == 1) {
-        response += " " + std::to_string(value); // Agrega el valor a la respuesta
-    }
 
     send(clientSocket, response.c_str(), response.size(), 0); // Envía la respuesta al cliente
     closesocket(clientSocket);                                // Cierra el socket del cliente
