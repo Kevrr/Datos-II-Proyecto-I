@@ -83,10 +83,11 @@ std::string MemoryManager::get(int id) {
  * 
  * @param id identifier for the cell
  */
-void MemoryManager::increaseRefCount(int id) {
+int MemoryManager::increaseRefCount(int id) {
     MemoryNode* node = this->map->find(id);
     if (node != nullptr) {
         node->increaseRefCount();
+        return 1;
     }
     return -1;
 }
@@ -96,10 +97,11 @@ void MemoryManager::increaseRefCount(int id) {
  * 
  * @param id identifier for the cell
  */
-void MemoryManager::decreaseRefCount(int id) {
+int MemoryManager::decreaseRefCount(int id) {
     MemoryNode* node = this->map->find(id);
     if (node != nullptr) {
         node->decreaseRefCount();
+        return 1;
     }
     return -1;
 }

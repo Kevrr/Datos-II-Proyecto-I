@@ -19,8 +19,8 @@ class MemoryManager {
     template<typename T>
     void set(int id, T value);
     std::string get(int id);
-    void increaseRefCount(int id);
-    void decreaseRefCount(int id);
+    int increaseRefCount(int id);
+    int decreaseRefCount(int id);
     void garbageCollection();
     ~MemoryManager();
 };
