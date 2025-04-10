@@ -29,9 +29,9 @@ class MemoryNode {
     int getRefCount();
     void increaseRefCount();
     void decreaseRefCount();
-    virtual void* getAddress();
-    virtual void setAddress(void* newPtr);
-    virtual std::string getValue();
+    virtual void* getAddress() = 0;
+    virtual void setAddress(void* newPtr) = 0;
+    virtual std::string getValue() = 0;
 };
 
 #endif

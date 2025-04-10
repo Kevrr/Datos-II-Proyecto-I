@@ -10,6 +10,9 @@
 MemoryManager::MemoryManager(int size, std::string path) {
     this->totalSize = size;
     this->memoryBlock = malloc(size);
+    if (this->memoryBlock == nullptr) {
+        throw std::bad_alloc();
+    }
     this->usedSize = 0;
     this->currentID = 0;
     this->map = new MemoryMap(path);

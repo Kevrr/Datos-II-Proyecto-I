@@ -94,16 +94,22 @@ void MemoryMap::add(int id, size_t size, DataType type, void* ptr) {
     switch (type) {
         case 0: 
         newNode = new MemoryNodeT<int>(id, size, type, ptr);
+        break;
         case 1:
         newNode = new MemoryNodeT<char>(id, size, type, ptr);
+        break;
         case 2:
         newNode = new MemoryNodeT<bool>(id, size, type, ptr);
+        break;
         case 3:
         newNode = new MemoryNodeT<float>(id, size, type, ptr);
+        break;
         case 4:
         newNode = new MemoryNodeT<double>(id, size, type, ptr);
+        break;
         default:
         newNode = nullptr;
+        break;
     }
     
     if (this->head == nullptr) {

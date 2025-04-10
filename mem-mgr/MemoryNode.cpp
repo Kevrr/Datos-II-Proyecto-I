@@ -1,12 +1,11 @@
 #include "MemoryNode.h"
 
-
 MemoryNode::MemoryNode(int id, size_t size, DataType type) {
-        this->id = id;
-        this->size = size;
-        this->type = type;
-        this->refCount = -1;
-        this->next = nullptr;
+    this->id = id;
+    this->size = size;
+    this->type = type;
+    this->refCount = -1;
+    this->next = nullptr;
 }
 
 MemoryNode* MemoryNode::getNext() {

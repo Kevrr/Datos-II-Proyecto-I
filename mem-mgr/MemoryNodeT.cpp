@@ -1,6 +1,7 @@
 #include "MemoryNodeT.h"
 #include "MemoryNode.cpp"
 #include <type_traits>
+#include <cstring>
 
 template<typename T>
 MemoryNodeT<T>::MemoryNodeT(int id, size_t size, DataType type, void* ptr) : MemoryNode(id, size, type) {
@@ -14,8 +15,11 @@ void* MemoryNodeT<T>::getAddress() {
 
 template<typename T>
 void MemoryNodeT<T>::setAddress(void* newPtr) {
+    if (newPtr == nullptr) {
+        return;
+    }
     if (newPtr != this->ptr) {
-        memmove(newPtr, this->ptr, this->getSize());
+        std::memcpy(newPtr, this->ptr, this->getSize());
         this->ptr = reinterpret_cast<T*>(newPtr);
     }
 }
