@@ -59,16 +59,9 @@ int Set(MemoryManager& memoryManager, int id, const std::string& valueString) {
     return res != -1;
 }
 
-template <typename T>
-int Get(MemoryManager& memoryManager, int id) {
-    /*//T value; // Variable para almacenar el valor obtenido
-    T res = memoryManager.get<T>(id); // Elimina el puntero
-    if (res != nullptr) {
-        //value = *static_cast<T*>(res); // Convierte el puntero a tipo T
-        //std::cout << "Valor: " << value << std::endl; // Imprime el valor
-        return 1; // Éxito
-    }*/
-    return 1; // Error
+std::string Get(MemoryManager& memoryManager, int id) {
+    std::cout << "Valor: " << memoryManager.get(id) << std::endl; // Imprime el valor
+    return memoryManager.get(id);
 }
 
 
@@ -100,62 +93,55 @@ void* handleClient(void* arg) {
     if (request.find("CREATE") == 0) {
         size_t size;
         char type[50];
-        sscanf(request.c_str(), "CREATE %zu %s", &size, type); // Extrae los parámetros
-        result = Create(memoryManager, size, type);           // Crea el bloque de memoria
-    } else if (request.find("SET", 0) == 0) {
+        sscanf(request.c_str(), "CREATE %zu %s", &size, type);
+        result = Create(memoryManager, size, type);
+        response = (result == 1) ? "OK" : "ERROR";
+
+    } else if (request.find("SET") == 0) {
         int id;
         char valueBuffer[256];
-        sscanf(request.c_str(), "SET %d %s", &id, valueBuffer); // Extrae los parámetros
+        sscanf(request.c_str(), "SET %d %s", &id, valueBuffer);
         std::string valueStr(valueBuffer);
 
-        // Eliminar las comillas si están presentes
         if (valueStr.front() == '\'' && valueStr.back() == '\'') {
             valueStr = valueStr.substr(1, valueStr.size() - 2);
         }
 
-        MemoryNode* node = memoryManager.getMemoryNodeById(id); // Busca el nodo en el administrador de memoria
-        DataType type = node->getType(); // Obtiene el tipo de dato del nodo
-        
-        if (type == TYPE_INT) {
-            result = Set<int>(memoryManager, id, valueStr);
-        } else if (type == TYPE_FLOAT) {
-            result = Set<float>(memoryManager, id, valueStr);
-        } else if (type == TYPE_CHAR) {
-            result = Set<char>(memoryManager, id, valueStr);
-        } else if (type == TYPE_DOUBLE) {
-            result = Set<double>(memoryManager, id, valueStr);
-        } else if (type == TYPE_BOOL) {
-            result = Set<bool>(memoryManager, id, valueStr);
-        } else {
-            result = 0; // o error
-        }
-        
-    } else if (request.find("GET", 0) == 0) {
-        /*int id;
-        sscanf(request.c_str(), "GET %d", &id);          // Extrae el parámetro
-        result = Get<void*>(memoryManager, id);           // Obtiene el valor del bloque de memoria
-        if (result == 1) {
-            void* valuePtr = memoryManager.get<void*>(id); // Obtiene el puntero genérico al bloque de memoria
-            if (valuePtr != nullptr) {
-            //response = "VALUE " + std::to_string(*static_cast<int*>(valuePtr)); // Convierte el valor a int como ejemplo
-            result = 1; // Éxito
-            } else {
-            //response = "ERROR"; // Error si el puntero es nulo
-            result = 0;
-            }
-        }*/
-        } else if (request.find("INCREASEREFCOUNT", 0) == 0) {
-        int id;
-        sscanf(request.c_str(), "INCREASEREFCOUNT %d", &id); // Extrae el parámetro
-        value = id;
-        result = IncreaseRefCount(memoryManager, id);            // Incrementa el contador de referencias
-    } else if (request.find("DECREASEREFCOUNT", 0) == 0) {
-        int id;
-        sscanf(request.c_str(), "DECREASEREFCOUNT %d", &id); // Extrae el parámetro
-        result = DecreaseRefCount(memoryManager, id);       // Decrementa el contador de referencias
-    } 
+        MemoryNode* node = memoryManager.getMemoryNodeById(id);
+        //if (!node) return "ERROR";
 
-    response = (result == 1) ? "OK" : "ERROR";        // Genera la respuesta
+        DataType type = node->getType();
+
+        if (type == TYPE_INT) result = Set<int>(memoryManager, id, valueStr);
+        else if (type == TYPE_FLOAT) result = Set<float>(memoryManager, id, valueStr);
+        else if (type == TYPE_CHAR) result = Set<char>(memoryManager, id, valueStr);
+        else if (type == TYPE_DOUBLE) result = Set<double>(memoryManager, id, valueStr);
+        else if (type == TYPE_BOOL) result = Set<bool>(memoryManager, id, valueStr);
+        else result = 0;
+
+        response =  (result == 1) ? "OK" : "ERROR";
+
+    } else if (request.find("GET") == 0) {
+        int id;
+        sscanf(request.c_str(), "GET %d", &id);
+
+        std::string value = Get(memoryManager, id);
+        response =  !value.empty() ? value : "ERROR";
+
+    } else if (request.find("INCREASEREFCOUNT") == 0) {
+        int id;
+        sscanf(request.c_str(), "INCREASEREFCOUNT %d", &id);
+        result = IncreaseRefCount(memoryManager, id);
+        response =  (result == 1) ? "OK" : "ERROR";
+
+    } else if (request.find("DECREASEREFCOUNT") == 0) {
+        int id;
+        sscanf(request.c_str(), "DECREASEREFCOUNT %d", &id);
+        result = DecreaseRefCount(memoryManager, id);
+        response =  (result == 1) ? "OK" : "ERROR";
+    } else {
+        response =  "UNKNOWN_COMMAND";        // Genera la respuesta
+    }    
 
     send(clientSocket, response.c_str(), response.size(), 0); // Envía la respuesta al cliente
     closesocket(clientSocket);                                // Cierra el socket del cliente
