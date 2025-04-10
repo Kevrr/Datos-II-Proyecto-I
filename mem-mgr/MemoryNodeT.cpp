@@ -23,7 +23,7 @@ void MemoryNodeT<T>::setAddress(void* newPtr) {
 template<typename T>
 std::string MemoryNodeT<T>::getValue() {
     if (this->ptr != nullptr) {
-        T value = *this->ptr;
+        T value = *reinterpret_cast<T*>(this->ptr);
         return std::to_string(value);
     }
 }

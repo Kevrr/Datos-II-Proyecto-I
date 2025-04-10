@@ -15,7 +15,6 @@ class MemoryManager {
 
     public:
     MemoryManager(int size, std::string path);
-    ~MemoryManager();
     int create(size_t size, DataType type);
     template<typename T>
     void set(int id, T value);

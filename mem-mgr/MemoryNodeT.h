@@ -10,7 +10,7 @@ class MemoryNodeT: public MemoryNode {
 
     public:
     MemoryNodeT(int id, size_t size, DataType type, void* ptr);
-    T* getAddress();
+    T* constgetAddress();
     void setAddress(void* newPtr);
     std::string getValue();
     template <typename U>
