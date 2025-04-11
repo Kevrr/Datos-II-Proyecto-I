@@ -81,6 +81,9 @@ int MemoryManager::increaseRefCount(int id) {
     MemoryNode* node = this->map->find(id);
     if (node != nullptr) {
         node->increaseRefCount();
+        if (node->getRefCount() == 0) {
+            node->increaseRefCount();
+        }
         return 1;
     }
     return -1;
