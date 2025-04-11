@@ -33,9 +33,6 @@ int MemoryNode::getRefCount() {
 }
 
 void MemoryNode::increaseRefCount() {
-    if (this->refCount < 0) {
-        this->refCount = 0;
-    }
     this->refCount++;
 }
 

@@ -152,7 +152,9 @@ bool MemoryMap::clean() {
             delete(temp);
         }
     }
-    this->dump();
+    if (deleted) {
+        this->dump();
+    } 
     return deleted;
 }
 

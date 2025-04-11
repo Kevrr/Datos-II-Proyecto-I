@@ -4,10 +4,13 @@
 template <typename T>
 MPointer<T>::MPointer() {
     serverIP = "127.0.0.1";
-    port = 1515;
+    port = 9090;
     std::string command = "CREATE ";
     command.append(std::to_string(sizeof(T)));
-    id = stoi(sendRequest(serverIP, port, command));
+    std::cout << command << "\n";
+    std::string response = sendRequest(serverIP, port, command);
+    std::cout << "id = " << response << "\n";
+    id = stoi(response);
 }
 
 template <typename T>
@@ -25,7 +28,9 @@ template <typename T>
 T MPointer<T>::operator*() {
     std::string command = "GET ";
     command.append(std::to_string(id));
+    std::cout << command << "\n";
     std::string response = sendRequest(serverIP, port, command);
+    std::cout << "got " << response << "\n";
     if (response.empty()) {
         throw std::invalid_argument("didn't receive response");
     }
@@ -65,13 +70,15 @@ void MPointer<T>::operator=(const U& data) {
         }
 
         command.append(value);
-        sendRequest(serverIP, port, command);
+        std::cout << command << "\n";
+        std::cout << sendRequest(serverIP, port, command) << "\n";
         return;
     } else if constexpr (std::is_convertible<std::decay_t<U>, MPointer<T>>::value) {
         id = data.getID();
         command = "INCREASEREFCOUNT ";
         command.append(std::to_string(id));
-        sendRequest(serverIP, port, command);
+        std::cout << command << "\n";
+        std::cout << sendRequest(serverIP, port, command) << "\n";
         return;
     }  else {
         static_assert(std::is_same<MPointer<T>, U>::value || std::is_same<T, U>::value, "U must be either MPointer<T> or T");
@@ -83,7 +90,9 @@ template <typename T>
 T MPointer<T>::operator&() {
     std::string command = "GET ";
     command.append(std::to_string(id));
+    std::cout << command << "\n";
     std::string response = sendRequest(serverIP, port, command);
+    std::cout << "got " << response << "\n";
     if (response.empty()) {
         throw std::invalid_argument("didn't receive response");
     }

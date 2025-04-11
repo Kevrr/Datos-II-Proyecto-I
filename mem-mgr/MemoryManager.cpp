@@ -1,5 +1,6 @@
 #include "MemoryManager.h"
 #include "MemoryMap.cpp"
+#include <unistd.h>
 
 /**
  * @brief Construct a new Memory Manager
@@ -104,6 +105,7 @@ void MemoryManager::garbageCollection() {
         if (this->map->clean()) {
             this->usedSize = this->map->defragment(this->memoryBlock);
         }
+        usleep(1000);
     }
 }
 

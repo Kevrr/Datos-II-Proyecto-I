@@ -95,7 +95,7 @@ void* handleClient(void* arg) {
         char type[50];
         sscanf(request.c_str(), "CREATE %zu %s", &size, type);
         result = Create(memoryManager, size, type);
-        response = (result == 1) ? "OK" : "ERROR";
+        response = (result != -1) ? std::to_string(result) : "ERROR";
 
     } else if (request.find("SET") == 0) {
         int id;
