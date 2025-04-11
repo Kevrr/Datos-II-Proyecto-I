@@ -41,8 +41,11 @@ bool LinkedList::cointains(int element) {
 }
 
 void LinkedList::add(int element) {
-    nodes.emplace_back(element, head_index);
-    head_index = nodes.size() - 1;
+    Node newNode = Node(element);
+    newNode.next_index = head_index;
+    nodes.emplace_back(newNode);
+    int newHead = nodes.size() - 1;
+    head_index = newHead;
     size = *size + 1;
 }
 int LinkedList::remove(int element) {

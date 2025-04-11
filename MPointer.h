@@ -1,12 +1,13 @@
 #ifndef MPOINTER_H
 #define MPOINTER_H
 
+#include <string>
 #include <typeinfo>
 
 template <typename T>
 class MPointer {
     private:
-    string serverIP;
+    std::string serverIP;
     int port; 
     int id;
 
@@ -14,10 +15,10 @@ class MPointer {
     MPointer();
     static MPointer<T> New();
     int getID();
-    T& operator*();
+    T operator*();
     template <typename U>
     void operator=(const U& data);
-    T& operator&();
+    T operator&();
     ~MPointer();
 };
 
