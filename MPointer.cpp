@@ -50,7 +50,7 @@ template <typename U>
 void MPointer<T>::operator=(const U& data) {
     std::string command;
     
-    if (std::is_same<T, std::decay_t<U>>::value) {
+    if constexpr (std::is_convertible<T, std::decay_t<U>>::value) {
         command = "SET ";
         command.append(std::to_string(id));
         command.append(" ");
@@ -67,7 +67,7 @@ void MPointer<T>::operator=(const U& data) {
         command.append(value);
         sendRequest(serverIP, port, command);
         return;
-    } else if (std::is_same<MPointer<T>, std::decay_t<U>>::value) {
+    } else if constexpr (std::is_convertible<std::decay_t<U>, MPointer<T>>::value) {
         id = data.getID();
         command = "INCREASEREFCOUNT ";
         command.append(std::to_string(id));
