@@ -12,6 +12,7 @@ class MPointer {
 
     public:
     MPointer();
+    static MPointer<T> New();
     int getID();
     T& operator*();
     template <typename U>

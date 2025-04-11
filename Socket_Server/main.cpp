@@ -173,7 +173,7 @@ void* serverThread(void* arg) {
     }
 }
 
-int main(int argc, char* argv[]) {
+/*int main(int argc, char* argv[]) {
     if (argc != 4) {
         std::cerr << "Uso: ./mem-mgr <LISTEN_PORT> <SIZE_MB> <DUMP_FOLDER>" << std::endl;
         return 1;
@@ -204,3 +204,4 @@ int main(int argc, char* argv[]) {
 
     return 0; 
 }
+*/

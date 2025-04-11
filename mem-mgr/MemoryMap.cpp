@@ -143,6 +143,8 @@ bool MemoryMap::clean() {
                 this->head = current->getNext();
             }
             deleted = true;
+        } else if (current->getRefCount() < 0) {
+            current->increaseRefCount();
         }
         prev = current;
         current = current->getNext();

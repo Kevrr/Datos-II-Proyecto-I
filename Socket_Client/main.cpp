@@ -50,7 +50,7 @@ string sendRequest(string serverIP, int port, const string& request) {
     return string(buffer);
 }
 
-int main() {
+/*int main() {
     // Dirección IP y puerto del servidor
     string serverIP = "127.0.0.1"; // IP del servidor (localhost)
     int port = 1515;              // Puerto del servidor
@@ -67,3 +67,4 @@ int main() {
 
     return 0; 
 }
+*/

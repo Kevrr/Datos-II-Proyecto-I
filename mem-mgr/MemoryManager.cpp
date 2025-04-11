@@ -110,3 +110,9 @@ void MemoryManager::garbageCollection() {
 MemoryNode* MemoryManager::getMemoryNodeById(int id) {
     return this->map->find(id);
 }
+
+static void* threadEntry(void* arg) {
+    MemoryManager* obj = static_cast<MemoryManager*>(arg);
+    obj->garbageCollection();
+    return nullptr;
+}
